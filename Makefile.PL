@@ -5,7 +5,6 @@ use warnings;
 use ExtUtils::MakeMaker;
 use Config;
 use File::Spec;
-use File::Basename ();
 use Env qw( @PKG_CONFIG_PATH );
 use IPC::Cmd qw( can_run );
 
