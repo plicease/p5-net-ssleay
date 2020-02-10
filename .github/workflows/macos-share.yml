@@ -41,9 +41,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/perl5
-          key: ${{ runner.os }}-build-share-${{ hashFiles('perlversion.txt') }}
+          key: ${{ runner.os }}-build-alien-share-${{ hashFiles('perlversion.txt') }}
           restore-keys: |
-            ${{ runner.os }}-build-share-${{ hashFiles('perlversion.txt') }}
+            ${{ runner.os }}-build-alien-share-${{ hashFiles('perlversion.txt') }}
 
       - name: Install Static Dependencies
         run: true
