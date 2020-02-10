@@ -49,7 +49,6 @@ jobs:
         run: true
       - name: Install Dynamic Dependencies
         run: |
-          cpanm --reinstall Alien::OpenSSL -n -v
           rm -rf /usr/local/Cellar/{openssl,libressl}/lib/pkgconfig
           cpanm --installdeps .
       - name: Run Tests

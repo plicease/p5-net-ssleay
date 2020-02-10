@@ -7,6 +7,7 @@ use Config;
 use File::Spec;
 use Env qw( @PKG_CONFIG_PATH );
 use IPC::Cmd qw( can_run );
+use Text::ParseWords qw( shellwords );
 
 # Define this to one if you want to link the openssl libraries statically into 
 # the Net-SSLeay loadable object on Windows
@@ -56,7 +57,7 @@ my %eumm_args = (
   ) },
   META_MERGE => {
     "meta-spec" => { version => 2 },
-    dynamic_config => 0,
+    dynamic_config => 1,
     resources => {
       repository => {
         type => 'git',
@@ -149,23 +150,26 @@ sub ssleay {
                 LIBS => [ $libs ],
             );
 
-            # TODO: convert this
-            ## From HMBRAND to handle multple version of OPENSSL installed
-            #if (my $lp = join " " => map '-L'.maybe_quote($_), @{$opts->{lib_paths} || []})
-            #{
-            #    ($args{uc $_} = $Config{$_}) =~ s/-L/$lp -L/ for qw(lddlflags ldflags);
-            #}
+            # From HMBRAND to handle multple version of OPENSSL installed
+            my @paths = grep /^-L/, shellwords($libs);
+            if (my $lp = join " " => map '-L'.maybe_quote($_), @paths)
+            {
+                ($args{uc $_} = $Config{$_}) =~ s/-L/$lp -L/ for qw(lddlflags ldflags);
+            }
 
         } else {
             my $alien = 'Alien::OpenSSL';
             if($^O eq 'MSWin32' || $^O eq 'openbsd') {
                 $alien = 'Alien::LibreSSL'
             }
+
+            # Alien::Base::Wrapper already handles multiple versions of OpenSSL.
             %args = (
-                CC => "\$(FULLPERL) -Iinc -MAlien::Base::Wrapper=$alien -e cc --",
-                LD => "\$(FULLPERL) -Iinc -MAlien::Base::Wrapper=$alien -e ld --",
+                CC => "\$(FULLPERL) -MAlien::Base::Wrapper=$alien -e cc --",
+                LD => "\$(FULLPERL) -MAlien::Base::Wrapper=$alien -e ld --",
                 BUILD_REQUIRES => {
-                    $alien => "0",
+                    'Alien::Base::Wrapper' => "0",
+                    $alien                 => "0",
                 },
             );
         }
