@@ -48,7 +48,9 @@ jobs:
       - name: Install Static Dependencies
         run: true
       - name: Install Dynamic Dependencies
-        run: cpanm --installdeps .
+        run: |
+          cpanm --reinstall Alien::LibreSSL -n
+          cpanm --installdeps .
       - name: Run Tests
         run: |
           perl Makefile.PL
