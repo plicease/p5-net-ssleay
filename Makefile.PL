@@ -9,10 +9,6 @@ use Env qw( @PKG_CONFIG_PATH );
 use IPC::Cmd qw( can_run );
 use Text::ParseWords qw( shellwords );
 
-# Define this to one if you want to link the openssl libraries statically into 
-# the Net-SSLeay loadable object on Windows
-my $win_link_statically = 0;
-
 my $tests = prompt(
   "Do you want to run external tests?\n".
   "These tests *will* *fail* if you do not have network connectivity.",
@@ -105,11 +101,9 @@ MAKE
 }
 
 sub ssleay {
-    # TODO: rsaref
-
     my %args;
 
-    if($^O eq 'VMS') {
+    if ($^O eq 'VMS') {
         my @paths;
         my @links;
         if (-r 'sslroot:[000000]openssl.cnf') {       # openssl.org source install
@@ -126,17 +120,17 @@ sub ssleay {
         }
         @links = map { $_ =~ s/32\b//g } @links if $Config{use64bitall};
         %args = (
-            LIBS => join(' ', (map '-L'.maybe_quote($_), @paths), (map {"-l$_"} @links)),
+            LIBS => join(' ', (map "-L$_", @paths), (map {"-l$_"} @links)),
         );
     }
 
     else {
 
-        if(defined $ENV{OPENSSL_PREFIX} && -d "$ENV{OPENSSL_PREFIX}/lib/pkgconfig") {
+        if (defined $ENV{OPENSSL_PREFIX} && -d "$ENV{OPENSSL_PREFIX}/lib/pkgconfig") {
             unshift @PKG_CONFIG_PATH, "$ENV{OPENSSL_PREFIX}/lib/pkgconfig";
         }
 
-        if(can_run('pkg-config') && system('pkg-config', '--exists', 'openssl') == 0) {
+        if (can_run('pkg-config') && system('pkg-config', '--exists', 'openssl') == 0) {
             my($name)    = map { [split /\s+/, $_ ]->[1] } grep /^openssl\s/, `pkg-config --list-all`;
             my $cflags  = `pkg-config --cflags     openssl`;
             my $libs    = `pkg-config --libs       openssl`;
@@ -147,7 +141,7 @@ sub ssleay {
             check_openssl_version($name, $version);
             %args = (
                 INC  => $cflags,
-                LIBS => [ $libs ],
+                LIBS => $libs,
             );
 
             # From HMBRAND to handle multple version of OPENSSL installed
@@ -157,11 +151,19 @@ sub ssleay {
                 ($args{uc $_} = $Config{$_}) =~ s/-L/$lp -L/ for qw(lddlflags ldflags);
             }
 
-        } else {
+        }
+
+        else {
             my $alien = 'Alien::OpenSSL';
-            if($^O eq 'MSWin32' || $^O eq 'openbsd') {
+
+            # On Windows LibreSSL installs more reliably
+            # On OpenBSD LibreSSL is the native SSL implementation
+            if ($^O eq 'MSWin32' || $^O eq 'openbsd') {
                 $alien = 'Alien::LibreSSL'
             }
+
+            print "*** Could not find OpenSSL\n",
+                  "    We will try to use $alien instead.\n";
 
             # Alien::Base::Wrapper already handles multiple versions of OpenSSL.
             %args = (
@@ -173,6 +175,17 @@ sub ssleay {
                 },
             );
         }
+
+        if (($Config{cc} =~ /aCC/i) && $^O eq 'hpux') {
+            print "*** Enabling HPUX aCC options (+e)\n";
+            $args{OPTIMIZE} = "+e $Config{optimize}";
+        }
+
+        if ( (($Config{ccname} || $Config{cc}) eq 'gcc') && ($Config{cccdlflags} =~ /-fpic/) ) {
+            print "*** Enabling gcc -fPIC optimization\n";
+            $args{CCDLFLAGS} = "$Config{ccdlflags} -fPIC";
+        }
+
     }
 
     %args;
@@ -184,7 +197,7 @@ sub check_openssl_version {
     my ($name, $version) = @_;
     my ($major, $minor, $letter);
 
-    if(($major, $minor, $letter) = $version =~ /(\d+\.\d+)\.(\d+)([a-z]?)/) {
+    if (($major, $minor, $letter) = $version =~ /(\d+\.\d+)\.(\d+)([a-z]?)/) {
         print "*** Found $name-$version installed\n";
     } else {
             die <<EOM

@@ -35,6 +35,11 @@ Note: SSLeay is no longer supported. If you want to use Net::SSLeay with
 
 LibreSSL is also supported.
 
+If no SSL implementation can be found, then Alien::OpenSSL or
+Alien::LibreSSL will be used.  This is automatic for modern CPAN
+clients.  If you have an older client or are installing manually
+you will have to install the appropriate Alien first.
+
 You should use the same C compiler and options to compile OpenSSL,
 perl, and Net::SSLeay. This is the only supported configuration.
 If you insist on using different compilers (perhaps because you
@@ -55,6 +60,20 @@ Unix:
 	perl Makefile.PL     # builds and tests it
 	make test            # Run the test suite
 	make install         # You probably have to su to root to do this
+
+        pkg-config is used to discover the compiler, linker flags and
+        version number of OpenSSL.  If pkg-config is unavailable or
+        if it fails to find OpenSSL, Alien::OpenSSL or Alien::LibreSSL
+        will be used.
+
+        On Debian or Ubuntu you can use the system OpenSSL by installing:
+
+        sudo apt-get update && sudo apt-get install libssl-dev pkg-config
+
+        On Fedora or Red Hat based systems you can use the system OpenSSL
+        by installing:
+
+        sudo yum install openssl-devel pkg-config
 
 	If your OpenSSL is installed in an unusual place, you can tell
 	Net-SSLeay where to find it with the OPENSSL_PREFIX environment
@@ -85,30 +104,10 @@ HPUX:
 
 Windows:
 	Supported on 32 and 64 bit platforms
-	See README.Win32 for details
 
-OS X:
-	See README.OSX
----------------------------------	
-You should also be able to use CPAN.pm to install this module if you like.
-
-Linking with RSAref is no longer supported (the patent issue is moot
-due to patent expiring). If you want to try it, you are on your own,
-but here's how it used to work...
-
-  For linking against RSAref the the OPENSSL_RSAREF environment variable like this:
-
-	OPENSSL_RSAREF=1 ./Makefile.PL -t  # builds and tests it, link against RSAref
-
-  You must previously have built OpenSSL with RSAref support (which
-  implies first building rsaref itself), I use the RSAglue method. File
-  librsaref.a must be found in one of the locations searched by linker
-  (-L switches). Usually this means that you have to rename rsaref.a to
-  librsaref.a and copy it to suitable directory, e.g. /usr/local/ssl/lib.
-
-  N.B. AFAIK the patent that made using RSAref necessary has expired, so
-  this should be nonissue by now.
-
+Strawberry Perl comes bundled with OpenSSL and should install correctly out
+of the box.  For Visual C++ Perl the recommended procedure is to install
+Alien::LibreSSL.  This should happen automatically with modern CPAN clients.
 
 Problems (read this before sending mail)
 ----------------------------------------
