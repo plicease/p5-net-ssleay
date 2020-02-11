@@ -62,6 +62,7 @@ environment:
     - perl: 5.8.9.5
       ssleay_need_cpanm: 1
       ssleay_rename_mingw: 1
+      ssleay_need_ipc_cmd: 1
 
 # 64 bit Strawberry Perl is not built for all versions
 matrix:
@@ -103,6 +104,7 @@ install:
   - if /I "%ssleay_need_cpanm%" == "1" cpan App::cpanminus
   - if /I "%ssleay_rename_mingw%" == "1" if exist C:\MinGW move C:\MinGW C:\MinGW-image
   - if /I "%ssleay_rename_mingw%" == "1" if exist C:\MinGW-W64 move C:\MinGW-W64 C:\MinGW-W64-image
+  - if /I "%ssleay_need_ipc_cmd%" == "1" cpanm --no-man-pages --notest IPC::Cmd
   - cpanm --no-man-pages --installdeps --with-develop --notest .
   - perl -V
 
