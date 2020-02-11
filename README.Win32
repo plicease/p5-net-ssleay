@@ -9,6 +9,15 @@ ancient versions and untested procedures removed --mikem
 
 Notes: 
 
+Supported on 32 and 64 bit platforms
+
+Strawberry Perl 5.8.1 and better come bundled with OpenSSL and should install
+correctly out of the box.  For Visual C++ Perl the recommended procedure is to
+install Alien::LibreSSL.  This should happen automatically with modern CPAN
+clients.  The rest of this README is of historical interest only, and contains
+links to binaries and instructions for versions of Windows that are no longer
+supported by Microsoft.
+
 1. With some combinations of Windows, perl, compiler and compiler options, you
 may see a runtime error "no OPENSSL_Applink", when calling
 Net::SSLeay::P_PKCS12_load_file. This appears to be due to incompatible
