@@ -109,6 +109,13 @@ Strawberry Perl comes bundled with OpenSSL and should install correctly out
 of the box.  For Visual C++ Perl the recommended procedure is to install
 Alien::LibreSSL.  This should happen automatically with modern CPAN clients.
 
+If you use OPENSSL_PREFIX to install your own OpenSSL, and you are using DLLs
+note that you will have to make sure that the OpenSSL bin directory is in the
+PATH so that the runtime can find the DLL.
+
+    set OPENSSL_PREFIX=c:\Openssl
+    set PATH=%PATH%;%OPENSSL_PREFIX%\bin
+
 Problems (read this before sending mail)
 ----------------------------------------
 
