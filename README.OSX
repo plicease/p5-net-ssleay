@@ -1,6 +1,18 @@
 As of 15 Jun 2015, Apply no longer ships OpenSSL with OS X:
 (http://lists.apple.com/archives/macnetworkprog/2015/Jun/msg00025.html)
 
+For homebrew users, you can install the openssl or libressl packages:
+
+brew install openssl
+
+or
+
+brew install libressl
+
+If you aren't using homebrew, then you can either build your own
+OpenSSL with the instructions below or fallback on Alien::OpenSSL,
+which will do that for you.
+
 Some OS X packages and bundles install OpenSSL, typically in /opt/local
 if that is the case it is sufficient for you to unpack and build
 Net-SSLeay in the usual way:
